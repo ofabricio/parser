@@ -42,6 +42,57 @@ void Example_Expr()
     assert(result == 72);
 }
 
+void Example_Json()
+{
+    Parser p(R"({ "name": "John", "country": [ "USA", "BRAZIL" ] })");
+
+    std::function<bool(std::string*)> jsn, obj, arr, str, key;
+
+    jsn = [&](std::string* out) {
+        p.Space();
+        return obj(out) || arr(out) || str(out);
+    };
+    obj = [&](std::string* out) {
+        if (p.Match('{')) {
+            if (!key(out)) {
+                return p.Match('}');
+            }
+            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out)))
+                ;
+            return p.Match('}');
+        }
+        return false;
+    };
+    arr = [&](std::string* out) {
+        if (p.Match('[')) {
+            if (!jsn(out)) {
+                return p.Match(']');
+            }
+            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out)))
+                ;
+            return p.Match(']');
+        }
+        return false;
+    };
+    str = [&](std::string* out) {
+        std::string_view n;
+        if (p.Match('"') && p.Out(p.Mark(), p.Until('"'), &n)) {
+            *out += std::string(n) + "; ";
+            return p.Match('"');
+        }
+        return false;
+    };
+    key = [&](std::string* out) {
+        p.Space();
+        std::string k;
+        return str(&k) && (p.Space() || true) && p.Match(':') && jsn(out);
+    };
+
+    std::string out;
+    assert(jsn(&out) == true);
+    assert(out == "John; USA; BRAZIL; ");
+}
+
 void Example()
 {
     Parser p("point(1 20)\n"
@@ -363,6 +414,7 @@ void TestMore()
 int main()
 {
     Example_Expr();
+    Example_Json();
     Example();
     TestUndo();
     TestOut();
