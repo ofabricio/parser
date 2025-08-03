@@ -50,7 +50,7 @@ void Example()
     std::vector<std::tuple<std::string_view, int, int>> results;
     while (p.More()) {
         auto m = p.Mark();
-        if (p.While('a', 'z')) {
+        if (p.While({ 'a', 'z' })) {
             auto tok = p.Token(m);
             int x, y;
             if (p.Match('(') && p.NumberOut(&x) && p.Space() && p.NumberOut(&y) && p.Match(')')) {
@@ -72,11 +72,11 @@ void TestOut()
     std::string_view out;
     assert(p.Out(p.Mark(), p.Number(), &out) == false);
     assert(out == "");
-    assert(p.Out(p.Mark(), p.While('a', 'z'), &out) == true);
+    assert(p.Out(p.Mark(), p.While({ 'a', 'z' }), &out) == true);
     assert(out == "aaa");
     assert(p.Out(p.Mark(), p.Number(), &out) == true);
     assert(out == "111");
-    assert(p.Out(p.Mark(), p.While('a', 'z'), &out) == true);
+    assert(p.Out(p.Mark(), p.While({ 'a', 'z' }), &out) == true);
     assert(out == "bbb");
 }
 
@@ -178,13 +178,41 @@ void TestUntil()
     p = Parser("abc");
     assert(p.Until('\n') == true);
     assert(p.Tail() == "");
+
+    p = Parser("ab.");
+    assert(p.Until('.', ',') == true);
+    assert(p.Tail() == ".");
+
+    p = Parser("ab.");
+    assert(p.Until(',', '.') == true);
+    assert(p.Tail() == ".");
+
+    p = Parser("ab;");
+    assert(p.Until(',', '.') == true);
+    assert(p.Tail() == "");
+
+    p = Parser("");
+    assert(p.Until(',', '.') == false);
+    assert(p.Tail() == "");
 }
 
 void TestWhile()
 {
-    Parser p("amz1");
-    assert(p.While('a', 'z') == true);
-    assert(p.Tail() == "1");
+    Parser p("Name_123()");
+    assert(p.While({ 'A', 'Z' }) == true);
+    assert(p.Tail() == "ame_123()");
+
+    p = Parser("Name_123()");
+    assert(p.While({ 'A', 'Z' }, { 'a', 'z' }) == true);
+    assert(p.Tail() == "_123()");
+
+    p = Parser("Name_123()");
+    assert(p.While({ 'A', 'Z' }, { 'a', 'z' }, { '_', '_' }) == true);
+    assert(p.Tail() == "123()");
+
+    p = Parser("Name_123()");
+    assert(p.While({ 'A', 'Z' }, { 'a', 'z' }, { '_', '_' }, { '0', '9' }) == true);
+    assert(p.Tail() == "()");
 }
 
 void TestMatch_Str()
@@ -204,6 +232,18 @@ void TestMatch_Char()
     assert(p.Tail() == "i");
     assert(p.Match('i') == true);
     assert(p.Tail() == "");
+
+    p = Parser("Hi");
+    assert(p.Match('X', 'H') == true);
+    assert(p.Tail() == "i");
+
+    p = Parser("Hi");
+    assert(p.Match('H', 'X') == true);
+    assert(p.Tail() == "i");
+
+    p = Parser("Hi");
+    assert(p.Match('X', 'Y') == false);
+    assert(p.Tail() == "Hi");
 }
 
 void TestEqual_Str()
@@ -219,6 +259,11 @@ void TestEqual_Char()
     Parser p("Hi");
     assert(p.Equal('H') == true);
     assert(p.Equal('i') == false);
+    assert(p.Tail() == "Hi");
+
+    assert(p.Equal('H', 'X') == true);
+    assert(p.Equal('X', 'H') == true);
+    assert(p.Equal('X', 'Y') == false);
     assert(p.Tail() == "Hi");
 }
 

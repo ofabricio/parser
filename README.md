@@ -15,7 +15,7 @@ int main()
 
     while (p.More()) {
         auto m = p.Mark();
-        if (p.While('a', 'z')) {
+        if (p.While({ 'a', 'z' })) {
             auto tok = p.Token(m);
             int x, y;
             if (p.Match('(') && p.NumberOut(&x) && p.Space() && p.NumberOut(&y) && p.Match(')')) {
