@@ -10,12 +10,12 @@ public:
     Parser(const std::string_view text)
         : text(text) { };
 
-    // This is a convenience function that undoes the operation if cond is false,
+    // Convenience function that undoes the operation if cond is false,
     // rewinding the parser to the marked position m.
-    // This is useful for parsing operations that may fail.
+    // Useful for recovering from operations that may fail mid-way.
     bool Undo(std::string_view m, bool cond);
-    // This is a convenience function that outputs the token from
-    // the mark m to the current position if cond matches.
+    // Convenience function that outputs the token from
+    // the mark m to the current position if cond is true.
     bool Out(std::string_view m, bool cond, std::string_view* out);
     // Matches a number and outputs it.
     // Advances the parser if it matches.
