@@ -196,6 +196,13 @@ void TestUntil()
     assert(p.Tail() == "");
 }
 
+void TestUntil_Range()
+{
+    Parser p("abc123");
+    assert(p.Until({ '0', '9' }) == true);
+    assert(p.Tail() == "123");
+}
+
 void TestWhile()
 {
     Parser p("Name_123()");
@@ -213,6 +220,18 @@ void TestWhile()
     p = Parser("Name_123()");
     assert(p.While({ 'A', 'Z' }, { 'a', 'z' }, { '_', '_' }, { '0', '9' }) == true);
     assert(p.Tail() == "()");
+}
+
+void TestMatch_Range()
+{
+    Parser p("abc");
+    assert(p.Match({ 'A', 'C' }) == false);
+    assert(p.Match({ 'a', 'c' }) == true);
+    assert(p.Tail() == "bc");
+    assert(p.Match({ 'a', 'c' }) == true);
+    assert(p.Tail() == "c");
+    assert(p.Match({ 'a', 'c' }) == true);
+    assert(p.Tail() == "");
 }
 
 void TestMatch_Str()
@@ -252,6 +271,15 @@ void TestEqual_Str()
     assert(p.Equal("Hi") == true);
     assert(p.Equal("No") == false);
     assert(p.Tail() == "Hi");
+}
+
+void TestEqual_Range()
+{
+    Parser p("a");
+    assert(p.Equal({ 'A', 'B' }) == false);
+    assert(p.Equal({ 'a', 'a' }) == true);
+    assert(p.Equal({ 'a', 'b' }) == true);
+    assert(p.Tail() == "a");
 }
 
 void TestEqual_Char()
@@ -324,10 +352,13 @@ int main()
     TestNumber();
     TestLine();
     TestSpace();
+    TestUntil_Range();
     TestUntil();
     TestWhile();
+    TestMatch_Range();
     TestMatch_Str();
     TestMatch_Char();
+    TestEqual_Range();
     TestEqual_Str();
     TestEqual_Char();
     TestBack();

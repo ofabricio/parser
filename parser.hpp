@@ -4,8 +4,6 @@
 #include <cstdlib>
 #include <string>
 
-#define InRange(ch, range) (ch >= range.first && ch <= range.second)
-
 // Text parser.
 class Parser {
 public:
@@ -27,6 +25,9 @@ public:
     // Matches whitespace characters.
     // Advances the parser if it matches.
     bool Space();
+    // Matches until any given character range.
+    // Advances the parser if it matches.
+    bool Until(std::pair<char, char> range);
     // Matches until any given character.
     // Advances the parser if it matches.
     template <typename... Char>
@@ -37,6 +38,9 @@ public:
     bool While(std::pair<char, char>, std::pair<char, char>);
     bool While(std::pair<char, char>, std::pair<char, char>, std::pair<char, char>);
     bool While(std::pair<char, char>, std::pair<char, char>, std::pair<char, char>, std::pair<char, char>);
+    // Matches any given character range.
+    // Advances the parser if it matches.
+    bool Match(std::pair<char, char> range);
     // Matches any given character.
     // Advances the parser if it matches.
     template <typename... Char>
@@ -47,6 +51,8 @@ public:
     // Matches the given string.
     // Advances the parser if it matches.
     bool Match(std::string_view);
+    // Tests any given character range.
+    bool Equal(std::pair<char, char>);
     // Tests any given character.
     template <typename... Char>
     bool Equal(char, Char...);
@@ -118,6 +124,15 @@ bool Parser::Space()
     return While({ '\0' + 1, ' ' });
 }
 
+bool Parser::Until(std::pair<char, char> range)
+{
+    auto m = Mark();
+    while (More() && !Equal(range)) {
+        Next();
+    }
+    return Moved(m);
+}
+
 template <typename... Char>
 bool Parser::Until(Char... any)
 {
@@ -131,7 +146,7 @@ bool Parser::Until(Char... any)
 bool Parser::While(std::pair<char, char> a)
 {
     auto m = Mark();
-    while (More() && InRange(Curr(), a)) {
+    while (More() && Equal(a)) {
         Next();
     }
     return Moved(m);
@@ -140,7 +155,7 @@ bool Parser::While(std::pair<char, char> a)
 bool Parser::While(std::pair<char, char> a, std::pair<char, char> b)
 {
     auto m = Mark();
-    while (More() && (InRange(Curr(), a) || InRange(Curr(), b))) {
+    while (More() && (Equal(a) || Equal(b))) {
         Next();
     }
     return Moved(m);
@@ -149,7 +164,7 @@ bool Parser::While(std::pair<char, char> a, std::pair<char, char> b)
 bool Parser::While(std::pair<char, char> a, std::pair<char, char> b, std::pair<char, char> c)
 {
     auto m = Mark();
-    while (More() && (InRange(Curr(), a) || InRange(Curr(), b) || InRange(Curr(), c))) {
+    while (More() && (Equal(a) || Equal(b) || Equal(c))) {
         Next();
     }
     return Moved(m);
@@ -158,10 +173,19 @@ bool Parser::While(std::pair<char, char> a, std::pair<char, char> b, std::pair<c
 bool Parser::While(std::pair<char, char> a, std::pair<char, char> b, std::pair<char, char> c, std::pair<char, char> d)
 {
     auto m = Mark();
-    while (More() && (InRange(Curr(), a) || InRange(Curr(), b) || InRange(Curr(), c) || InRange(Curr(), d))) {
+    while (More() && (Equal(a) || Equal(b) || Equal(c) || Equal(d))) {
         Next();
     }
     return Moved(m);
+}
+
+bool Parser::Match(std::pair<char, char> range)
+{
+    if (Equal(range)) {
+        Next();
+        return true;
+    }
+    return false;
 }
 
 template <typename... Char>
@@ -186,6 +210,11 @@ bool Parser::Match(std::string_view v)
         return true;
     }
     return false;
+}
+
+bool Parser::Equal(std::pair<char, char> range)
+{
+    return Curr() >= range.first && Curr() <= range.second;
 }
 
 template <typename... Char>
