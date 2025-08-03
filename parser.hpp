@@ -115,13 +115,7 @@ bool Parser::NumberOut(int* out)
 
 bool Parser::Number()
 {
-    auto m = Mark();
-    Match('-') || Match('+');
-    if (While({ '0', '9' })) {
-        return true;
-    }
-    Back(m);
-    return false;
+    return Undo(Mark(), (Match('-', '+') || true) && While({ '0', '9' }));
 }
 
 bool Parser::Line()

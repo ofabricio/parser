@@ -109,6 +109,10 @@ void TestNumberOut_Int()
     assert(p.NumberOut(&out) == true);
     assert(out == 2);
 
+    p = Parser("-02");
+    assert(p.NumberOut(&out) == true);
+    assert(out == -2);
+
     p = Parser("x");
     assert(p.NumberOut(&out) == false);
 }
@@ -130,6 +134,10 @@ void TestNumber()
     p = Parser("+2");
     assert(p.Number() == true);
     assert(p.Tail() == "");
+
+    p = Parser("-");
+    assert(p.Number() == false);
+    assert(p.Tail() == "-");
 
     p = Parser("x");
     assert(p.Number() == false);
