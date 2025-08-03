@@ -66,6 +66,15 @@ void Example()
     assert(results[1] == std::make_tuple("vector", -2, -30));
 }
 
+void TestUndo()
+{
+    Parser p("1+2");
+    assert(p.Undo(p.Mark(), p.Match('1') && p.Match('+') && p.Match('3')) == false);
+    assert(p.Tail() == "1+2");
+    assert(p.Undo(p.Mark(), p.Match('1') && p.Match('+') && p.Match('2')) == true);
+    assert(p.Tail() == "");
+}
+
 void TestOut()
 {
     Parser p("aaa111bbb");
@@ -347,6 +356,7 @@ int main()
 {
     Example_Expr();
     Example();
+    TestUndo();
     TestOut();
     TestNumberOut_Int();
     TestNumber();
