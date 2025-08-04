@@ -23,6 +23,9 @@ public:
     // Matches a number.
     // Advances the parser if it matches.
     bool Number();
+    // Matches a string enclosed in quotes. Skips escaped quotes.
+    // Advances the parser if it matches.
+    bool String(char quote);
     // Matches a line (up to a newline character).
     // Advances the parser if it matches.
     bool Line();
@@ -116,6 +119,17 @@ bool Parser::NumberOut(int* out)
 bool Parser::Number()
 {
     return Undo(Mark(), (Match('-', '+') || true) && While({ '0', '9' }));
+}
+
+bool Parser::String(char quote)
+{
+    auto m = Mark();
+    if (Match(quote)) {
+        while (More() && (!Equal(quote, '\\') || Match('\\'))) {
+            Next();
+        }
+    }
+    return Undo(m, Match(quote));
 }
 
 bool Parser::Line()

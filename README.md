@@ -121,10 +121,10 @@ int main()
         return false;
     };
     str = [&](std::string* out) {
-        std::string_view n;
-        if (p.Match('"') && p.Out(p.Mark(), p.Until('"'), &n)) {
-            *out += std::string(n) + "; ";
-            return p.Match('"');
+        auto m = p.Mark();
+        if (p.String('"')) {
+            *out += std::string(p.Token(m)) + "; ";
+            return true;
         }
         return false;
     };
@@ -137,7 +137,7 @@ int main()
     std::string out;
     jsn(&out);
     printf("%s\n", out.c_str());
-    // John; USA; BRAZIL;
+    // "John"; "USA"; "BRAZIL";
 
     return 0;
 }

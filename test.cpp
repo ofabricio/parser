@@ -75,10 +75,10 @@ void Example_Json()
         return false;
     };
     str = [&](std::string* out) {
-        std::string_view n;
-        if (p.Match('"') && p.Out(p.Mark(), p.Until('"'), &n)) {
-            *out += std::string(n) + "; ";
-            return p.Match('"');
+        auto m = p.Mark();
+        if (p.String('"')) {
+            *out += std::string(p.Token(m)) + "; ";
+            return true;
         }
         return false;
     };
@@ -90,7 +90,7 @@ void Example_Json()
 
     std::string out;
     assert(jsn(&out) == true);
-    assert(out == "John; USA; BRAZIL; ");
+    assert(out == R"("John"; "USA"; "BRAZIL"; )");
 }
 
 void Example()
@@ -115,6 +115,49 @@ void Example()
     assert(results.size() == 2);
     assert(results[0] == std::make_tuple("point", 1, 20));
     assert(results[1] == std::make_tuple("vector", -2, -30));
+}
+
+void TestString()
+{
+    Parser p(R"("")");
+    assert(p.String('"') == true);
+    assert(p.Tail() == "");
+
+    p = Parser(R"("a")");
+    assert(p.String('"') == true);
+    assert(p.Tail() == "");
+
+    p = Parser(R"("a\"b\"c")");
+    assert(p.String('"') == true);
+    assert(p.Tail() == "");
+
+    p = Parser(R"("a\nb\"c")");
+    assert(p.String('"') == true);
+    assert(p.Tail() == "");
+
+    p = Parser(R"("a)");
+    assert(p.String('"') == false);
+    assert(p.Tail() == R"("a)");
+
+    p = Parser("''");
+    assert(p.String('\'') == true);
+    assert(p.Tail() == "");
+
+    p = Parser("'a'");
+    assert(p.String('\'') == true);
+    assert(p.Tail() == "");
+
+    p = Parser("'a\\'b\\'c'");
+    assert(p.String('\'') == true);
+    assert(p.Tail() == "");
+
+    p = Parser("'a\\'b\\'c'");
+    assert(p.String('\'') == true);
+    assert(p.Tail() == "");
+
+    p = Parser("'a");
+    assert(p.String('\'') == false);
+    assert(p.Tail() == "'a");
 }
 
 void TestUndo()
@@ -416,6 +459,7 @@ int main()
     Example_Expr();
     Example_Json();
     Example();
+    TestString();
     TestUndo();
     TestOut();
     TestNumberOut_Int();
