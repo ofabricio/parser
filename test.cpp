@@ -160,6 +160,15 @@ void TestString()
     assert(p.Tail() == "'a");
 }
 
+void TestPeek()
+{
+    Parser p("1+2");
+    assert(p.Peek(p.Mark(), p.Match('1') && p.Match('+') && p.Match('3')) == false);
+    assert(p.Tail() == "1+2");
+    assert(p.Peek(p.Mark(), p.Match('1') && p.Match('+') && p.Match('2')) == true);
+    assert(p.Tail() == "1+2");
+}
+
 void TestUndo()
 {
     Parser p("1+2");
@@ -460,6 +469,7 @@ int main()
     Example_Json();
     Example();
     TestString();
+    TestPeek();
     TestUndo();
     TestOut();
     TestNumberOut_Int();

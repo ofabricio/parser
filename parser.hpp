@@ -10,6 +10,9 @@ public:
     Parser(const std::string_view text)
         : text(text) { };
 
+    // Convenience function that allows to look ahead.
+    // The parser goes back to the mark m on cond either true or false.
+    bool Peek(std::string_view m, bool cond);
     // Convenience function that undoes the operation if cond is false,
     // rewinding the parser to the marked position m.
     // Useful for recovering from operations that may fail mid-way.
@@ -95,6 +98,12 @@ bool Parser::Out(std::string_view m, bool cond, std::string_view* out)
     if (Undo(m, cond)) {
         *out = Token(m);
     }
+    return cond;
+}
+
+bool Parser::Peek(std::string_view m, bool cond)
+{
+    Back(m);
     return cond;
 }
 
