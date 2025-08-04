@@ -144,3 +144,24 @@ int main()
     return 0;
 }
 ```
+
+## Introduction
+
+This library implements a **Mark, Match and Move** mechanism,
+which is a simple, intuitive way to parse and collect tokens.
+
+All matching operations are based on this pattern:
+
+```cpp
+auto m = p.Mark();
+if (p.Match("something")) {
+    auto t = p.Token(m);
+}
+```
+
+First a mark is set to the current position.
+Then the parser advances on a match.
+Finally, the mark is used to extract the matched token on success.
+It could be used to move the parser back to the marked position if needed.
+
+That's all about it.
