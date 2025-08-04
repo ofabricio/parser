@@ -36,6 +36,7 @@ int main()
 ## Example: math expression
 
 This example shows how to parse a math expression.
+Note that this example is not production-ready.
 
 ```cpp
 #include <cstdio>
@@ -87,7 +88,8 @@ int main()
 
 ## Example: json
 
-This example shows how to parse a Json and collect all string values.
+This example shows how to parse a Json and get all string values.
+Note that this example is not production-ready.
 
 ```cpp
 #include <cstdio>
