@@ -297,6 +297,36 @@ void TestSpace()
     assert(p.Tail() == "x");
 }
 
+void TestNot()
+{
+    Parser p("ab");
+    assert(p.Not('b') == true);
+    assert(p.Tail() == "b");
+    assert(p.Not('b') == false);
+    assert(p.Tail() == "b");
+
+    p = Parser("ab");
+    assert(p.Not('b', 'c') == true);
+    assert(p.Tail() == "b");
+    assert(p.Not('a', 'b') == false);
+    assert(p.Tail() == "b");
+
+    p = Parser("ab");
+    assert(p.Not({ '0', '9' }) == true);
+    assert(p.Tail() == "b");
+    assert(p.Not({ 'a', 'z' }) == false);
+    assert(p.Tail() == "b");
+
+    p = Parser("aNot");
+    assert(p.Not("Not") == true);
+    assert(p.Tail() == "Not");
+    assert(p.Not("Not") == false);
+    assert(p.Tail() == "Not");
+
+    p = Parser("");
+    assert(p.Not('x') == false);
+}
+
 void TestAny()
 {
     Parser p("ab");
@@ -506,6 +536,7 @@ int main()
     TestNumber();
     TestLine();
     TestSpace();
+    TestNot();
     TestAny();
     TestUntil_Range();
     TestUntil();

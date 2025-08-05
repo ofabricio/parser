@@ -38,6 +38,16 @@ public:
     // Matches whitespace characters.
     // Advances the parser if it matches.
     bool Space();
+    // Matches any character that is not the string.
+    // Advances the parser by one character if it does not match.
+    bool Not(std::string_view);
+    // Matches any character that is not in the given range.
+    // Advances the parser by one character if it does not match.
+    bool Not(std::pair<char, char> range);
+    // Matches any character that is not any given one.
+    // Advances the parser by one character if it does not match.
+    template <typename... Char>
+    bool Not(Char... any);
     // Matches any character.
     // Advances the parser if it matches.
     bool Any();
@@ -181,13 +191,37 @@ bool Parser::Space()
     return While({ '\0' + 1, ' ' });
 }
 
-bool Parser::Any()
+bool Parser::Not(std::string_view v)
 {
-    if (More()) {
+    if (More() && !Equal(v)) {
         Next();
         return true;
     }
     return false;
+}
+
+bool Parser::Not(std::pair<char, char> range)
+{
+    if (More() && !Equal(range)) {
+        Next();
+        return true;
+    }
+    return false;
+}
+
+template <typename... Char>
+bool Parser::Not(Char... args)
+{
+    if (More() && !Equal(args...)) {
+        Next();
+        return true;
+    }
+    return false;
+}
+
+bool Parser::Any()
+{
+    return Not('\0');
 }
 
 bool Parser::Until(std::pair<char, char> range)
