@@ -25,7 +25,7 @@ public:
     bool Out(std::string_view m, bool cond, std::vector<std::string>& out);
     // Matches a number and outputs it.
     // Advances the parser if it matches.
-    bool NumberOut(int& out);
+    bool Number(int& out);
     // Matches a number.
     // Advances the parser if it matches.
     bool Number();
@@ -155,7 +155,7 @@ bool Parser::Undo(std::string_view m, bool cond)
     return cond;
 }
 
-bool Parser::NumberOut(int& out)
+bool Parser::Number(int& out)
 {
     auto m = Mark();
     if (Number()) {

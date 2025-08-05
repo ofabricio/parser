@@ -18,7 +18,7 @@ int main()
         if (p.While({ 'a', 'z' })) {
             auto tok = p.Token(m);
             int x, y;
-            if (p.Match('(') && p.NumberOut(x) && p.Space() && p.NumberOut(y) && p.Match(')')) {
+            if (p.Match('(') && p.Number(x) && p.Space() && p.Number(y) && p.Match(')')) {
                 printf("name: %.*s, x: %d, y: %d\n", static_cast<int>(tok.size()), tok.data(), x, y);
             }
         } else {
@@ -74,7 +74,7 @@ int main()
         return false;
     };
     fact = [&](int& out) {
-        return (p.Match('(') && expr(out) && p.Match(')')) || p.NumberOut(out);
+        return (p.Match('(') && expr(out) && p.Match(')')) || p.Number(out);
     };
 
     int result = 0;

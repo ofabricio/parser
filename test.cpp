@@ -34,7 +34,7 @@ void Example_Expr()
         return false;
     };
     fact = [&](int& out) {
-        return (p.Match('(') && expr(out) && p.Match(')')) || p.NumberOut(out);
+        return (p.Match('(') && expr(out) && p.Match(')')) || p.Number(out);
     };
 
     int result = 0;
@@ -57,8 +57,7 @@ void Example_Json()
             if (!key(out)) {
                 return p.Match('}');
             }
-            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out)))
-                ;
+            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out))) { }
             return p.Match('}');
         }
         return false;
@@ -68,8 +67,7 @@ void Example_Json()
             if (!jsn(out)) {
                 return p.Match(']');
             }
-            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out)))
-                ;
+            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out))) { }
             return p.Match(']');
         }
         return false;
@@ -104,7 +102,7 @@ void Example()
         if (p.While({ 'a', 'z' })) {
             auto tok = p.Token(m);
             int x, y;
-            if (p.Match('(') && p.NumberOut(x) && p.Space() && p.NumberOut(y) && p.Match(')')) {
+            if (p.Match('(') && p.Number(x) && p.Space() && p.Number(y) && p.Match(')')) {
                 results.emplace_back(tok, x, y);
             }
         } else {
@@ -212,32 +210,32 @@ void TestOut()
     assert(out4 == (std::vector<std::string_view> { "111", "222" }));
 }
 
-void TestNumberOut_Int()
+void TestNumber_Int()
 {
     int out;
 
     Parser p("2");
-    assert(p.NumberOut(out) == true);
+    assert(p.Number(out) == true);
     assert(out == 2);
 
     p = Parser("23");
-    assert(p.NumberOut(out) == true);
+    assert(p.Number(out) == true);
     assert(out == 23);
 
     p = Parser("-2");
-    assert(p.NumberOut(out) == true);
+    assert(p.Number(out) == true);
     assert(out == -2);
 
     p = Parser("+2");
-    assert(p.NumberOut(out) == true);
+    assert(p.Number(out) == true);
     assert(out == 2);
 
     p = Parser("-02");
-    assert(p.NumberOut(out) == true);
+    assert(p.Number(out) == true);
     assert(out == -2);
 
     p = Parser("x");
-    assert(p.NumberOut(out) == false);
+    assert(p.Number(out) == false);
 }
 
 void TestNumber()
@@ -532,7 +530,7 @@ int main()
     TestPeek();
     TestUndo();
     TestOut();
-    TestNumberOut_Int();
+    TestNumber_Int();
     TestNumber();
     TestLine();
     TestSpace();
