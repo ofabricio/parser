@@ -38,6 +38,9 @@ public:
     // Matches whitespace characters.
     // Advances the parser if it matches.
     bool Space();
+    // Matches any character.
+    // Advances the parser if it matches.
+    bool Any();
     // Matches until any given character range.
     // Advances the parser if it matches.
     bool Until(std::pair<char, char> range);
@@ -176,6 +179,15 @@ bool Parser::Line()
 bool Parser::Space()
 {
     return While({ '\0' + 1, ' ' });
+}
+
+bool Parser::Any()
+{
+    if (More()) {
+        Next();
+        return true;
+    }
+    return false;
 }
 
 bool Parser::Until(std::pair<char, char> range)

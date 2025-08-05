@@ -297,6 +297,16 @@ void TestSpace()
     assert(p.Tail() == "x");
 }
 
+void TestAny()
+{
+    Parser p("ab");
+    assert(p.Any() == true);
+    assert(p.Tail() == "b");
+    assert(p.Any() == true);
+    assert(p.Tail() == "");
+    assert(p.Any() == false);
+}
+
 void TestUntil()
 {
     Parser p("\n");
@@ -496,6 +506,7 @@ int main()
     TestNumber();
     TestLine();
     TestSpace();
+    TestAny();
     TestUntil_Range();
     TestUntil();
     TestWhile();
