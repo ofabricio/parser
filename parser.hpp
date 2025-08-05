@@ -19,10 +19,10 @@ public:
     bool Undo(std::string_view m, bool cond);
     // Convenience function that outputs the token from
     // the mark m to the current position if cond is true.
-    bool Out(std::string_view m, bool cond, std::string_view* out);
+    bool Out(std::string_view m, bool cond, std::string_view& out);
     // Matches a number and outputs it.
     // Advances the parser if it matches.
-    bool NumberOut(int* out);
+    bool NumberOut(int& out);
     // Matches a number.
     // Advances the parser if it matches.
     bool Number();
@@ -93,10 +93,10 @@ private:
     std::string_view text;
 };
 
-bool Parser::Out(std::string_view m, bool cond, std::string_view* out)
+bool Parser::Out(std::string_view m, bool cond, std::string_view& out)
 {
     if (Undo(m, cond)) {
-        *out = Token(m);
+        out = Token(m);
     }
     return cond;
 }
@@ -115,11 +115,11 @@ bool Parser::Undo(std::string_view m, bool cond)
     return cond;
 }
 
-bool Parser::NumberOut(int* out)
+bool Parser::NumberOut(int& out)
 {
     auto m = Mark();
     if (Number()) {
-        *out = atoi(m.data());
+        out = atoi(m.data());
         return true;
     }
     return false;

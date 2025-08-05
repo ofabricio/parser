@@ -18,7 +18,7 @@ int main()
         if (p.While({ 'a', 'z' })) {
             auto tok = p.Token(m);
             int x, y;
-            if (p.Match('(') && p.NumberOut(&x) && p.Space() && p.NumberOut(&y) && p.Match(')')) {
+            if (p.Match('(') && p.NumberOut(x) && p.Space() && p.NumberOut(y) && p.Match(')')) {
                 printf("name: %.*s, x: %d, y: %d\n", static_cast<int>(tok.size()), tok.data(), x, y);
             }
         } else {
@@ -47,38 +47,38 @@ int main()
 {
     Parser p("(2+3)*4");
 
-    std::function<bool(int*)> expr, term, fact;
+    std::function<bool(int&)> expr, term, fact;
 
-    expr = [&](int* out) {
+    expr = [&](int& out) {
         if (term(out)) {
             int r;
-            if (p.Match('+') && expr(&r)) {
-                *out += r;
-            } else if (p.Match('-') && expr(&r)) {
-                *out -= r;
+            if (p.Match('+') && expr(r)) {
+                out += r;
+            } else if (p.Match('-') && expr(r)) {
+                out -= r;
             }
             return true;
         }
         return false;
     };
-    term = [&](int* out) {
+    term = [&](int& out) {
         if (fact(out)) {
             int r;
-            if (p.Match('*') && term(&r)) {
-                *out *= r;
-            } else if (p.Match('/') && term(&r)) {
-                *out /= r;
+            if (p.Match('*') && term(r)) {
+                out *= r;
+            } else if (p.Match('/') && term(r)) {
+                out /= r;
             }
             return true;
         }
         return false;
     };
-    fact = [&](int* out) {
+    fact = [&](int& out) {
         return (p.Match('(') && expr(out) && p.Match(')')) || p.NumberOut(out);
     };
 
     int result = 0;
-    expr(&result);
+    expr(result);
     printf("Result: %d\n", result);
     // Result: 20
 
@@ -100,13 +100,13 @@ int main()
 {
     Parser p(R"({ "name": "John", "country": [ "USA", "BRAZIL" ] })");
 
-    std::function<bool(std::string*)> jsn, obj, arr, str, key;
+    std::function<bool(std::string&)> jsn, obj, arr, str, key;
 
-    jsn = [&](std::string* out) {
+    jsn = [&](std::string& out) {
         p.Space();
         return obj(out) || arr(out) || str(out);
     };
-    obj = [&](std::string* out) {
+    obj = [&](std::string& out) {
         if (p.Match('{')) {
             if (!key(out)) return p.Match('}');
             while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out)));
@@ -114,7 +114,7 @@ int main()
         }
         return false;
     };
-    arr = [&](std::string* out) {
+    arr = [&](std::string& out) {
         if (p.Match('[')) {
             if (!jsn(out)) return p.Match(']');
             while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out)));
@@ -122,22 +122,22 @@ int main()
         }
         return false;
     };
-    str = [&](std::string* out) {
+    str = [&](std::string& out) {
         auto m = p.Mark();
         if (p.String('"')) {
-            *out += std::string(p.Token(m)) + "; ";
+            out += std::string(p.Token(m)) + "; ";
             return true;
         }
         return false;
     };
-    key = [&](std::string* out) {
+    key = [&](std::string& out) {
         p.Space();
         std::string k;
-        return str(&k) && (p.Space() || true) && p.Match(':') && jsn(out);
+        return str(k) && (p.Space() || true) && p.Match(':') && jsn(out);
     };
 
     std::string out;
-    jsn(&out);
+    jsn(out);
     printf("%s\n", out.c_str());
     // "John"; "USA"; "BRAZIL";
 

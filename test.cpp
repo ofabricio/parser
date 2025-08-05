@@ -7,38 +7,38 @@ void Example_Expr()
 {
     Parser p("(6-1)*4*2+(1+3)*(16/2)");
 
-    std::function<bool(int*)> expr, term, fact;
+    std::function<bool(int&)> expr, term, fact;
 
-    expr = [&](int* out) {
+    expr = [&](int& out) {
         if (term(out)) {
             int r;
-            if (p.Match('+') && expr(&r)) {
-                *out += r;
-            } else if (p.Match('-') && expr(&r)) {
-                *out -= r;
+            if (p.Match('+') && expr(r)) {
+                out += r;
+            } else if (p.Match('-') && expr(r)) {
+                out -= r;
             }
             return true;
         }
         return false;
     };
-    term = [&](int* out) {
+    term = [&](int& out) {
         if (fact(out)) {
             int r;
-            if (p.Match('*') && term(&r)) {
-                *out *= r;
-            } else if (p.Match('/') && term(&r)) {
-                *out /= r;
+            if (p.Match('*') && term(r)) {
+                out *= r;
+            } else if (p.Match('/') && term(r)) {
+                out /= r;
             }
             return true;
         }
         return false;
     };
-    fact = [&](int* out) {
+    fact = [&](int& out) {
         return (p.Match('(') && expr(out) && p.Match(')')) || p.NumberOut(out);
     };
 
     int result = 0;
-    assert(expr(&result) == true);
+    assert(expr(result) == true);
     assert(result == 72);
 }
 
@@ -46,13 +46,13 @@ void Example_Json()
 {
     Parser p(R"({ "name": "John", "country": [ "USA", "BRAZIL" ] })");
 
-    std::function<bool(std::string*)> jsn, obj, arr, str, key;
+    std::function<bool(std::string&)> jsn, obj, arr, str, key;
 
-    jsn = [&](std::string* out) {
+    jsn = [&](std::string& out) {
         p.Space();
         return obj(out) || arr(out) || str(out);
     };
-    obj = [&](std::string* out) {
+    obj = [&](std::string& out) {
         if (p.Match('{')) {
             if (!key(out)) {
                 return p.Match('}');
@@ -63,7 +63,7 @@ void Example_Json()
         }
         return false;
     };
-    arr = [&](std::string* out) {
+    arr = [&](std::string& out) {
         if (p.Match('[')) {
             if (!jsn(out)) {
                 return p.Match(']');
@@ -74,22 +74,22 @@ void Example_Json()
         }
         return false;
     };
-    str = [&](std::string* out) {
+    str = [&](std::string& out) {
         auto m = p.Mark();
         if (p.String('"')) {
-            *out += std::string(p.Token(m)) + "; ";
+            out += std::string(p.Token(m)) + "; ";
             return true;
         }
         return false;
     };
-    key = [&](std::string* out) {
+    key = [&](std::string& out) {
         p.Space();
         std::string k;
-        return str(&k) && (p.Space() || true) && p.Match(':') && jsn(out);
+        return str(k) && (p.Space() || true) && p.Match(':') && jsn(out);
     };
 
     std::string out;
-    assert(jsn(&out) == true);
+    assert(jsn(out) == true);
     assert(out == R"("John"; "USA"; "BRAZIL"; )");
 }
 
@@ -104,7 +104,7 @@ void Example()
         if (p.While({ 'a', 'z' })) {
             auto tok = p.Token(m);
             int x, y;
-            if (p.Match('(') && p.NumberOut(&x) && p.Space() && p.NumberOut(&y) && p.Match(')')) {
+            if (p.Match('(') && p.NumberOut(x) && p.Space() && p.NumberOut(y) && p.Match(')')) {
                 results.emplace_back(tok, x, y);
             }
         } else {
@@ -180,16 +180,10 @@ void TestUndo()
 
 void TestOut()
 {
-    Parser p("aaa111bbb");
+    Parser p("123a");
     std::string_view out;
-    assert(p.Out(p.Mark(), p.Number(), &out) == false);
-    assert(out == "");
-    assert(p.Out(p.Mark(), p.While({ 'a', 'z' }), &out) == true);
-    assert(out == "aaa");
-    assert(p.Out(p.Mark(), p.Number(), &out) == true);
-    assert(out == "111");
-    assert(p.Out(p.Mark(), p.While({ 'a', 'z' }), &out) == true);
-    assert(out == "bbb");
+    assert(p.Out(p.Mark(), p.Number(), out) == true);
+    assert(out == "123");
 }
 
 void TestNumberOut_Int()
@@ -197,27 +191,27 @@ void TestNumberOut_Int()
     int out;
 
     Parser p("2");
-    assert(p.NumberOut(&out) == true);
+    assert(p.NumberOut(out) == true);
     assert(out == 2);
 
     p = Parser("23");
-    assert(p.NumberOut(&out) == true);
+    assert(p.NumberOut(out) == true);
     assert(out == 23);
 
     p = Parser("-2");
-    assert(p.NumberOut(&out) == true);
+    assert(p.NumberOut(out) == true);
     assert(out == -2);
 
     p = Parser("+2");
-    assert(p.NumberOut(&out) == true);
+    assert(p.NumberOut(out) == true);
     assert(out == 2);
 
     p = Parser("-02");
-    assert(p.NumberOut(&out) == true);
+    assert(p.NumberOut(out) == true);
     assert(out == -2);
 
     p = Parser("x");
-    assert(p.NumberOut(&out) == false);
+    assert(p.NumberOut(out) == false);
 }
 
 void TestNumber()
