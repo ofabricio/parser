@@ -98,7 +98,7 @@ public:
     std::string_view Tail();
     // Returns the current character.
     char Curr();
-    // Advances the parser by 1 character.
+    // Advances the parser by one characters.
     void Next();
     // Advances the parser by n characters.
     void Advance(int);
@@ -174,9 +174,7 @@ bool Parser::String(char quote)
 {
     auto m = Mark();
     if (Match(quote)) {
-        while (More() && (!Equal(quote, '\\') || Match('\\'))) {
-            Next();
-        }
+        while (Not(quote, '\\') || (Match('\\') && Any())) { }
     }
     return Undo(m, Match(quote));
 }
@@ -193,43 +191,24 @@ bool Parser::Space()
 
 bool Parser::Not(std::string_view v)
 {
-    if (More() && !Equal(v)) {
-        Next();
-        return true;
-    }
-    return false;
+    return !Equal(v) && Any();
 }
 
 bool Parser::Not(std::pair<char, char> range)
 {
-    if (More() && !Equal(range)) {
-        Next();
-        return true;
-    }
-    return false;
+    return !Equal(range) && Any();
 }
 
 template <typename... Char>
 bool Parser::Not(Char... args)
 {
-    if (More() && !Equal(args...)) {
-        Next();
-        return true;
-    }
-    return false;
-}
-
-bool Parser::Any()
-{
-    return Not('\0');
+    return !Equal(args...) && Any();
 }
 
 bool Parser::Until(std::pair<char, char> range)
 {
     auto m = Mark();
-    while (More() && !Equal(range)) {
-        Next();
-    }
+    while (Not(range)) { }
     return Moved(m);
 }
 
@@ -237,55 +216,41 @@ template <typename... Char>
 bool Parser::Until(Char... any)
 {
     auto m = Mark();
-    while (More() && !Equal(any...)) {
-        Next();
-    }
+    while (Not(any...)) { }
     return Moved(m);
 }
 
 bool Parser::While(std::pair<char, char> a)
 {
     auto m = Mark();
-    while (More() && Equal(a)) {
-        Next();
-    }
+    while (Match(a)) { }
     return Moved(m);
 }
 
 bool Parser::While(std::pair<char, char> a, std::pair<char, char> b)
 {
     auto m = Mark();
-    while (More() && (Equal(a) || Equal(b))) {
-        Next();
-    }
+    while ((Match(a) || Match(b))) { }
     return Moved(m);
 }
 
 bool Parser::While(std::pair<char, char> a, std::pair<char, char> b, std::pair<char, char> c)
 {
     auto m = Mark();
-    while (More() && (Equal(a) || Equal(b) || Equal(c))) {
-        Next();
-    }
+    while ((Match(a) || Match(b) || Match(c))) { }
     return Moved(m);
 }
 
 bool Parser::While(std::pair<char, char> a, std::pair<char, char> b, std::pair<char, char> c, std::pair<char, char> d)
 {
     auto m = Mark();
-    while (More() && (Equal(a) || Equal(b) || Equal(c) || Equal(d))) {
-        Next();
-    }
+    while ((Match(a) || Match(b) || Match(c) || Match(d))) { }
     return Moved(m);
 }
 
 bool Parser::Match(std::pair<char, char> range)
 {
-    if (Equal(range)) {
-        Next();
-        return true;
-    }
-    return false;
+    return Equal(range) && Any();
 }
 
 template <typename... Char>
@@ -296,17 +261,22 @@ bool Parser::Match(char v, Char... any)
 
 bool Parser::Match(char v)
 {
-    if (Equal(v)) {
-        Next();
-        return true;
-    }
-    return false;
+    return Equal(v) && Any();
 }
 
 bool Parser::Match(std::string_view v)
 {
     if (Equal(v)) {
         Advance(v.size());
+        return true;
+    }
+    return false;
+}
+
+bool Parser::Any()
+{
+    if (More()) {
+        Next();
         return true;
     }
     return false;
