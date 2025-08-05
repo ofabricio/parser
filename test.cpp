@@ -181,9 +181,35 @@ void TestUndo()
 void TestOut()
 {
     Parser p("123a");
-    std::string_view out;
-    assert(p.Out(p.Mark(), p.Number(), out) == true);
-    assert(out == "123");
+
+    p = Parser("123a");
+    std::string_view out0;
+    assert(p.Out(p.Mark(), p.Match('a'), out0) == false);
+    assert(out0 == "");
+
+    p = Parser("123a");
+    std::string_view out1;
+    assert(p.Out(p.Mark(), p.Number(), out1) == true);
+    assert(out1 == "123");
+
+    p = Parser("123a");
+    std::string out2;
+    assert(p.Out(p.Mark(), p.Number(), out2) == true);
+    assert(out2 == "123");
+
+    p = Parser("111a222");
+    std::vector<std::string> out3;
+    assert(p.Out(p.Mark(), p.Number(), out3) == true);
+    p.Match('a');
+    assert(p.Out(p.Mark(), p.Number(), out3) == true);
+    assert(out3 == (std::vector<std::string> { "111", "222" }));
+
+    p = Parser("111a222");
+    std::vector<std::string_view> out4;
+    assert(p.Out(p.Mark(), p.Number(), out4) == true);
+    p.Match('a');
+    assert(p.Out(p.Mark(), p.Number(), out4) == true);
+    assert(out4 == (std::vector<std::string_view> { "111", "222" }));
 }
 
 void TestNumberOut_Int()

@@ -20,6 +20,9 @@ public:
     // Convenience function that outputs the token from
     // the mark m to the current position if cond is true.
     bool Out(std::string_view m, bool cond, std::string_view& out);
+    bool Out(std::string_view m, bool cond, std::string& out);
+    bool Out(std::string_view m, bool cond, std::vector<std::string_view>& out);
+    bool Out(std::string_view m, bool cond, std::vector<std::string>& out);
     // Matches a number and outputs it.
     // Advances the parser if it matches.
     bool NumberOut(int& out);
@@ -97,6 +100,30 @@ bool Parser::Out(std::string_view m, bool cond, std::string_view& out)
 {
     if (Undo(m, cond)) {
         out = Token(m);
+    }
+    return cond;
+}
+
+bool Parser::Out(std::string_view m, bool cond, std::string& out)
+{
+    if (Undo(m, cond)) {
+        out = Token(m);
+    }
+    return cond;
+}
+
+bool Parser::Out(std::string_view m, bool cond, std::vector<std::string_view>& out)
+{
+    if (Undo(m, cond)) {
+        out.push_back(Token(m));
+    }
+    return cond;
+}
+
+bool Parser::Out(std::string_view m, bool cond, std::vector<std::string>& out)
+{
+    if (Undo(m, cond)) {
+        out.push_back(std::string(Token(m)));
     }
     return cond;
 }
