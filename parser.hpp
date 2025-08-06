@@ -44,20 +44,24 @@ public:
     // Matches any character that is not in the given range.
     // Advances the parser by one character if it does not match.
     bool Not(std::pair<char, char> range);
-    // Matches any character that is not any given one.
+    // Matches a character that is not the given one.
     // Advances the parser by one character if it does not match.
-    template <typename... Char>
-    bool Not(Char... any);
+    bool Not(char);
+    // Matches any character that is not the given ones.
+    // Advances the parser by one character if it does not match.
+    bool Not(char, char);
     // Matches any character.
     // Advances the parser if it matches.
     bool Any();
     // Matches until any given character range.
     // Advances the parser if it matches.
     bool Until(std::pair<char, char> range);
+    // Matches until the given character.
+    // Advances the parser if it matches.
+    bool Until(char);
     // Matches until any given character.
     // Advances the parser if it matches.
-    template <typename... Char>
-    bool Until(Char... any);
+    bool Until(char, char);
     // Matches while in any given character range.
     // Advances the parser if it matches.
     bool While(std::pair<char, char>);
@@ -67,23 +71,21 @@ public:
     // Matches any given character range.
     // Advances the parser if it matches.
     bool Match(std::pair<char, char> range);
-    // Matches any given character.
-    // Advances the parser if it matches.
-    template <typename... Char>
-    bool Match(char, Char...);
     // Matches the given character.
     // Advances the parser if it matches.
     bool Match(char);
+    // Matches any given character.
+    // Advances the parser if it matches.
+    bool Match(char, char);
     // Matches the given string.
     // Advances the parser if it matches.
     bool Match(std::string_view);
     // Tests any given character range.
     bool Equal(std::pair<char, char>);
-    // Tests any given character.
-    template <typename... Char>
-    bool Equal(char, Char...);
     // Tests the given character.
     bool Equal(char);
+    // Tests any given character.
+    bool Equal(char, char);
     // Tests the given string.
     bool Equal(std::string_view);
     // Returns a mark to the current position.
@@ -199,10 +201,14 @@ bool Parser::Not(std::pair<char, char> range)
     return !Equal(range) && Any();
 }
 
-template <typename... Char>
-bool Parser::Not(Char... args)
+bool Parser::Not(char a, char b)
 {
-    return !Equal(args...) && Any();
+    return !Equal(a, b) && Any();
+}
+
+bool Parser::Not(char a)
+{
+    return !Equal(a) && Any();
 }
 
 bool Parser::Until(std::pair<char, char> range)
@@ -212,11 +218,17 @@ bool Parser::Until(std::pair<char, char> range)
     return Moved(m);
 }
 
-template <typename... Char>
-bool Parser::Until(Char... any)
+bool Parser::Until(char a, char b)
 {
     auto m = Mark();
-    while (Not(any...)) { }
+    while (Not(a, b)) { }
+    return Moved(m);
+}
+
+bool Parser::Until(char a)
+{
+    auto m = Mark();
+    while (Not(a)) { }
     return Moved(m);
 }
 
@@ -253,15 +265,14 @@ bool Parser::Match(std::pair<char, char> range)
     return Equal(range) && Any();
 }
 
-template <typename... Char>
-bool Parser::Match(char v, Char... any)
+bool Parser::Match(char a, char b)
 {
-    return Match(v) || Match(any...);
+    return Equal(a, b) && Any();
 }
 
-bool Parser::Match(char v)
+bool Parser::Match(char a)
 {
-    return Equal(v) && Any();
+    return Equal(a) && Any();
 }
 
 bool Parser::Match(std::string_view v)
@@ -273,13 +284,9 @@ bool Parser::Match(std::string_view v)
     return false;
 }
 
-bool Parser::Any()
+bool Parser::Equal(std::string_view v)
 {
-    if (More()) {
-        Next();
-        return true;
-    }
-    return false;
+    return text.substr(0, v.size()) == v;
 }
 
 bool Parser::Equal(std::pair<char, char> range)
@@ -287,20 +294,23 @@ bool Parser::Equal(std::pair<char, char> range)
     return Curr() >= range.first && Curr() <= range.second;
 }
 
-template <typename... Char>
-bool Parser::Equal(char v, Char... any)
+bool Parser::Equal(char a, char b)
 {
-    return Equal(v) || Equal(any...);
+    return Curr() == a || Curr() == b;
 }
 
-bool Parser::Equal(char v)
+bool Parser::Equal(char a)
 {
-    return Curr() == v;
+    return Curr() == a;
 }
 
-bool Parser::Equal(std::string_view v)
+bool Parser::Any()
 {
-    return text.substr(0, v.size()) == v;
+    if (More()) {
+        Next();
+        return true;
+    }
+    return false;
 }
 
 std::string_view Parser::Mark()
