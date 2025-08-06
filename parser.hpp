@@ -197,26 +197,6 @@ bool Parser::Space()
     return While({ '\0' + 1, ' ' });
 }
 
-bool Parser::Not(std::string_view v)
-{
-    return !Equal(v) && Any();
-}
-
-bool Parser::Not(std::pair<char, char> range)
-{
-    return !Equal(range) && Any();
-}
-
-bool Parser::Not(char a, char b)
-{
-    return !Equal(a, b) && Any();
-}
-
-bool Parser::Not(char a)
-{
-    return !Equal(a) && Any();
-}
-
 bool Parser::Until(std::string_view v)
 {
     auto m = Mark();
@@ -280,6 +260,35 @@ bool Parser::While(std::pair<char, char> a, std::pair<char, char> b, std::pair<c
     return Moved(m);
 }
 
+bool Parser::Not(std::string_view v)
+{
+    return !Equal(v) && Any();
+}
+
+bool Parser::Not(std::pair<char, char> range)
+{
+    return !Equal(range) && Any();
+}
+
+bool Parser::Not(char a, char b)
+{
+    return !Equal(a, b) && Any();
+}
+
+bool Parser::Not(char a)
+{
+    return !Equal(a) && Any();
+}
+
+bool Parser::Match(std::string_view v)
+{
+    if (Equal(v)) {
+        Advance(v.size());
+        return true;
+    }
+    return false;
+}
+
 bool Parser::Match(std::pair<char, char> range)
 {
     return Equal(range) && Any();
@@ -293,15 +302,6 @@ bool Parser::Match(char a, char b)
 bool Parser::Match(char a)
 {
     return Equal(a) && Any();
-}
-
-bool Parser::Match(std::string_view v)
-{
-    if (Equal(v)) {
-        Advance(v.size());
-        return true;
-    }
-    return false;
 }
 
 bool Parser::Equal(std::string_view v)
