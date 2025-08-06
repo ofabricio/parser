@@ -62,6 +62,9 @@ public:
     // Matches until any given character.
     // Advances the parser if it matches.
     bool Until(char, char);
+    // Matches while the given character.
+    // Advances the parser if it matches.
+    bool While(char);
     // Matches while in any given character range.
     // Advances the parser if it matches.
     bool While(std::pair<char, char>);
@@ -229,6 +232,13 @@ bool Parser::Until(char a)
 {
     auto m = Mark();
     while (Not(a)) { }
+    return Moved(m);
+}
+
+bool Parser::While(char a)
+{
+    auto m = Mark();
+    while (Match(a)) { }
     return Moved(m);
 }
 

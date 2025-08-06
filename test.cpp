@@ -383,7 +383,13 @@ void TestUntil_Range()
 
 void TestWhile()
 {
-    Parser p("Name_123()");
+    Parser p("...x");
+    assert(p.While('x') == false);
+    assert(p.Tail() == "...x");
+    assert(p.While('.') == true);
+    assert(p.Tail() == "x");
+
+    p = Parser("Name_123()");
     assert(p.While({ 'A', 'Z' }) == true);
     assert(p.Tail() == "ame_123()");
 
