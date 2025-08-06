@@ -374,6 +374,14 @@ void TestUntil()
     assert(p.Tail() == "");
 }
 
+void TestUntil_Str()
+{
+    Parser p("abc123");
+    assert(p.Until("abc") == false);
+    assert(p.Until("123") == true);
+    assert(p.Tail() == "123");
+}
+
 void TestUntil_Range()
 {
     Parser p("abc123");
@@ -542,6 +550,7 @@ int main()
     TestSpace();
     TestNot();
     TestAny();
+    TestUntil_Str();
     TestUntil_Range();
     TestUntil();
     TestWhile();

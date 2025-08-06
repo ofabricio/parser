@@ -53,6 +53,9 @@ public:
     // Matches any character.
     // Advances the parser if it matches.
     bool Any();
+    // Matches until the given string.
+    // Advances the parser if it matches.
+    bool Until(std::string_view);
     // Matches until any given character range.
     // Advances the parser if it matches.
     bool Until(std::pair<char, char> range);
@@ -212,6 +215,13 @@ bool Parser::Not(char a, char b)
 bool Parser::Not(char a)
 {
     return !Equal(a) && Any();
+}
+
+bool Parser::Until(std::string_view v)
+{
+    auto m = Mark();
+    while (Not(v)) { }
+    return Moved(m);
 }
 
 bool Parser::Until(std::pair<char, char> range)
