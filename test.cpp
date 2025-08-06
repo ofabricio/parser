@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <functional>
 
-#include "parser.hpp"
+#include "walker.hpp"
 
 void Example_Expr()
 {
