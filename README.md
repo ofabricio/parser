@@ -110,16 +110,18 @@ int main()
     };
     obj = [&](std::string& out) {
         if (p.Match('{')) {
-            if (!key(out)) return p.Match('}');
-            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out)));
+            if (key(out)) {
+                while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out))) { }
+            }
             return p.Match('}');
         }
         return false;
     };
     arr = [&](std::string& out) {
         if (p.Match('[')) {
-            if (!jsn(out)) return p.Match(']');
-            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out)));
+            if (jsn(out)) {
+                while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out))) { }
+            }
             return p.Match(']');
         }
         return false;
@@ -149,8 +151,8 @@ int main()
 
 ## Introduction
 
-This library implements a **Mark, Match and Move** mechanism,
-which is a simple, intuitive way to parse and collect tokens.
+This library implements a **Mark-Match-Move** mechanism,
+which is a simple way to parse and collect tokens.
 
 All matching operations are based on this pattern:
 

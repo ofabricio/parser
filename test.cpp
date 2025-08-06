@@ -54,20 +54,18 @@ void Example_Json()
     };
     obj = [&](std::string& out) {
         if (p.Match('{')) {
-            if (!key(out)) {
-                return p.Match('}');
+            if (key(out)) {
+                while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out))) { }
             }
-            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out))) { }
             return p.Match('}');
         }
         return false;
     };
     arr = [&](std::string& out) {
         if (p.Match('[')) {
-            if (!jsn(out)) {
-                return p.Match(']');
+            if (jsn(out)) {
+                while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out))) { }
             }
-            while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out))) { }
             return p.Match(']');
         }
         return false;
