@@ -111,7 +111,7 @@ private:
 
 bool Parser::Out(std::string_view m, bool cond, std::string_view& out)
 {
-    if (Undo(m, cond)) {
+    if (cond) {
         out = Token(m);
     }
     return cond;
@@ -119,7 +119,7 @@ bool Parser::Out(std::string_view m, bool cond, std::string_view& out)
 
 bool Parser::Out(std::string_view m, bool cond, std::string& out)
 {
-    if (Undo(m, cond)) {
+    if (cond) {
         out = Token(m);
     }
     return cond;
@@ -127,7 +127,7 @@ bool Parser::Out(std::string_view m, bool cond, std::string& out)
 
 bool Parser::Out(std::string_view m, bool cond, std::vector<std::string_view>& out)
 {
-    if (Undo(m, cond)) {
+    if (cond) {
         out.push_back(Token(m));
     }
     return cond;
@@ -135,7 +135,7 @@ bool Parser::Out(std::string_view m, bool cond, std::vector<std::string_view>& o
 
 bool Parser::Out(std::string_view m, bool cond, std::vector<std::string>& out)
 {
-    if (Undo(m, cond)) {
+    if (cond) {
         out.push_back(std::string(Token(m)));
     }
     return cond;
