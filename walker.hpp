@@ -1,8 +1,8 @@
-#ifndef OFAB_PARSER_HPP
-#define OFAB_PARSER_HPP
+#ifndef WALKER_HPP
+#define WALKER_HPP
 
-#include <cstdlib>
 #include <string>
+#include <vector>
 
 // Text parser.
 class Parser {

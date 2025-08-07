@@ -1,14 +1,14 @@
 # walker
 
-A text parser in C++.
+General purpose text parser in C++.
 
 ## Example
 
 This example shows how to collect the names and the arguments of the statements.
 
 ```cpp
-#include <cstdio>
-#include "parser.hpp"
+#include <iostream>
+#include "walker.hpp"
 
 int main()
 {
@@ -21,7 +21,7 @@ int main()
             auto tok = p.Token(m);
             int x, y;
             if (p.Match('(') && p.Number(x) && p.Space() && p.Number(y) && p.Match(')')) {
-                printf("name: %.*s, x: %d, y: %d\n", static_cast<int>(tok.size()), tok.data(), x, y);
+                std::cout << "name: " << tok << ", x: " << x << ", y: " << y << std::endl;
             }
         } else {
             p.Next();
@@ -41,9 +41,9 @@ This example shows how to parse a math expression.
 Note that this example is not production-ready.
 
 ```cpp
-#include <cstdio>
+#include <iostream>
 #include <functional>
-#include "parser.hpp"
+#include "walker.hpp"
 
 int main()
 {
@@ -79,10 +79,10 @@ int main()
         return (p.Match('(') && expr(out) && p.Match(')')) || p.Number(out);
     };
 
-    int result = 0;
-    expr(result);
-    printf("Result: %d\n", result);
-    // Result: 20
+    int out = 0;
+    expr(out);
+    std::cout << out << std::endl;
+    // 20
 
     return 0;
 }
@@ -94,9 +94,9 @@ This example shows how to parse a Json and get all string values.
 Note that this example is not production-ready.
 
 ```cpp
-#include <cstdio>
+#include <iostream>
 #include <functional>
-#include "parser.hpp"
+#include "walker.hpp"
 
 int main()
 {
@@ -111,8 +111,9 @@ int main()
     obj = [&](std::string& out) {
         if (p.Match('{')) {
             if (key(out)) {
-                while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && key(out))) { }
+                while (p.Match(',') && key(out)) { }
             }
+            p.Space();
             return p.Match('}');
         }
         return false;
@@ -120,13 +121,15 @@ int main()
     arr = [&](std::string& out) {
         if (p.Match('[')) {
             if (jsn(out)) {
-                while ((p.Space() || true) && p.Undo(p.Mark(), p.Match(',') && jsn(out))) { }
+                while (p.Match(',') && jsn(out)) { }
             }
+            p.Space();
             return p.Match(']');
         }
         return false;
     };
     str = [&](std::string& out) {
+        p.Space();
         auto m = p.Mark();
         if (p.String('"')) {
             out += std::string(p.Token(m)) + "; ";
@@ -135,14 +138,13 @@ int main()
         return false;
     };
     key = [&](std::string& out) {
-        p.Space();
         std::string k;
-        return str(k) && (p.Space() || true) && p.Match(':') && jsn(out);
+        return str(k) && p.Match(':') && jsn(out);
     };
 
     std::string out;
     jsn(out);
-    printf("%s\n", out.c_str());
+    std::cout << out << std::endl;
     // "John"; "USA"; "BRAZIL";
 
     return 0;
@@ -151,7 +153,7 @@ int main()
 
 ## Introduction
 
-This library implements a **Mark-Match-Move** mechanism,
+This library implements a Mark-Match-Move mechanism,
 which is a simple way to parse and collect tokens.
 
 All matching operations are based on this pattern:
