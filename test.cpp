@@ -73,7 +73,6 @@ void Example_Json()
         return false;
     };
     str = [&](std::string& out) {
-        p.Space();
         auto m = p.Mark();
         if (p.String('"')) {
             out += std::string(p.Token(m)) + "; ";
@@ -82,8 +81,8 @@ void Example_Json()
         return false;
     };
     key = [&](std::string& out) {
-        std::string k;
-        return str(k) && p.Match(':') && jsn(out);
+        p.Space();
+        return p.String('"') && p.Match(':') && jsn(out);
     };
 
     std::string out;
