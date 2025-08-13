@@ -26,15 +26,15 @@ public:
     // Matches a float number and outputs it.
     // Advances the parser if it matches.
     bool Number(float& out);
-    // Matches a number and outputs it.
+    // Matches an integer number and outputs it.
     // Advances the parser if it matches.
     bool Number(int& out);
     // Matches a float number.
     // Advances the parser if it matches.
     bool Float();
-    // Matches a number.
+    // Matches an integer number.
     // Advances the parser if it matches.
-    bool Number();
+    bool Integer();
     // Matches a string enclosed in quotes. Skips escaped quotes.
     // Advances the parser if it matches.
     bool String(char quote);
@@ -182,7 +182,7 @@ bool Parser::Number(float& out)
 bool Parser::Number(int& out)
 {
     auto m = Mark();
-    if (Number()) {
+    if (Integer()) {
         out = atoi(m.data());
         return true;
     }
@@ -213,7 +213,7 @@ bool Parser::Float()
     return false;
 }
 
-bool Parser::Number()
+bool Parser::Integer()
 {
     return Undo(Mark(), (Match('-', '+') || true) && While({ '0', '9' }));
 }

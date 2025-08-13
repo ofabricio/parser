@@ -195,26 +195,26 @@ void TestOut()
 
     p = Parser("123a");
     std::string_view out1;
-    assert(p.Out(p.Mark(), p.Number(), out1) == true);
+    assert(p.Out(p.Mark(), p.Integer(), out1) == true);
     assert(out1 == "123");
 
     p = Parser("123a");
     std::string out2;
-    assert(p.Out(p.Mark(), p.Number(), out2) == true);
+    assert(p.Out(p.Mark(), p.Integer(), out2) == true);
     assert(out2 == "123");
 
     p = Parser("111a222");
     std::vector<std::string> out3;
-    assert(p.Out(p.Mark(), p.Number(), out3) == true);
+    assert(p.Out(p.Mark(), p.Integer(), out3) == true);
     p.Match('a');
-    assert(p.Out(p.Mark(), p.Number(), out3) == true);
+    assert(p.Out(p.Mark(), p.Integer(), out3) == true);
     assert(out3 == (std::vector<std::string> { "111", "222" }));
 
     p = Parser("111a222");
     std::vector<std::string_view> out4;
-    assert(p.Out(p.Mark(), p.Number(), out4) == true);
+    assert(p.Out(p.Mark(), p.Integer(), out4) == true);
     p.Match('a');
-    assert(p.Out(p.Mark(), p.Number(), out4) == true);
+    assert(p.Out(p.Mark(), p.Integer(), out4) == true);
     assert(out4 == (std::vector<std::string_view> { "111", "222" }));
 }
 
@@ -254,8 +254,12 @@ void TestNumber_Float()
 void TestNumber_Int()
 {
     auto ttTrue = std::vector<std::pair<std::string_view, int>> {
-        { "2", 2 }, { "23", 23 }, { "-2", -2 }, { "+2", 2 },
+        { "0", 0 }, { "2", 2 }, { "190", 190 }, { "-2", -2 }, { "+2", 2 },
         { "02", 2 }, { "-02", -2 }, { "+02", 2 }, // Should this be allowed?
+    };
+
+    auto ttFalse = {
+        "-", "+"
     };
 
     for (auto&& tc : ttTrue) {
@@ -264,6 +268,13 @@ void TestNumber_Int()
         assert(p.Number(out) == true);
         assert(out == tc.second);
         assert(p.Tail() == "");
+    }
+    for (auto&& tc : ttFalse) {
+        int out = -1;
+        Parser p(tc);
+        assert(p.Number(out) == false);
+        assert(out == -1);
+        assert(p.Tail() == tc);
     }
 }
 
@@ -292,30 +303,30 @@ void TestFloat()
     }
 }
 
-void TestNumber()
+void TestInteger()
 {
     Parser p("2");
-    assert(p.Number() == true);
+    assert(p.Integer() == true);
     assert(p.Tail() == "");
 
     p = Parser("23");
-    assert(p.Number() == true);
+    assert(p.Integer() == true);
     assert(p.Tail() == "");
 
     p = Parser("-2");
-    assert(p.Number() == true);
+    assert(p.Integer() == true);
     assert(p.Tail() == "");
 
     p = Parser("+2");
-    assert(p.Number() == true);
+    assert(p.Integer() == true);
     assert(p.Tail() == "");
 
     p = Parser("-");
-    assert(p.Number() == false);
+    assert(p.Integer() == false);
     assert(p.Tail() == "-");
 
     p = Parser("x");
-    assert(p.Number() == false);
+    assert(p.Integer() == false);
     assert(p.Tail() == "x");
 }
 
@@ -601,7 +612,7 @@ int main()
     TestNumber_Float();
     TestNumber_Int();
     TestFloat();
-    TestNumber();
+    TestInteger();
     TestLine();
     TestSpace();
     TestNot();
