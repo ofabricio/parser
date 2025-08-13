@@ -211,30 +211,43 @@ void TestOut()
 
 void TestNumber_Int()
 {
-    int out;
+    auto ttTrue = std::vector<std::pair<std::string_view, int>> {
+        { "2", 2 }, { "23", 23 }, { "-2", -2 }, { "+2", 2 },
+        { "02", 2 }, { "-02", -2 }, { "+02", 2 }, // Should this be allowed?
+    };
 
-    Parser p("2");
-    assert(p.Number(out) == true);
-    assert(out == 2);
+    for (auto&& tc : ttTrue) {
+        int out;
+        Parser p(tc.first);
+        assert(p.Number(out) == true);
+        assert(out == tc.second);
+        assert(p.Tail() == "");
+    }
+}
 
-    p = Parser("23");
-    assert(p.Number(out) == true);
-    assert(out == 23);
+void TestFloat()
+{
+    auto ttTrue = {
+        "0", "1", "-1", "+9", "-20", "-0", "190",
+        "0.0", "1.5", "-1.0", "+1.0", "1.234", "123.456",
+        ".35", "-.35", "+.35", // Should this be allowed?
+        "4e2", "4.e2", "4.3e2", "4.3E2", "4.3e+2", "4.3e-2", //
+    };
 
-    p = Parser("-2");
-    assert(p.Number(out) == true);
-    assert(out == -2);
+    auto ttFalse = {
+        "-", "+", "4.3e", "4.3e-", ".e", "..2", "1.e"
+    };
 
-    p = Parser("+2");
-    assert(p.Number(out) == true);
-    assert(out == 2);
-
-    p = Parser("-02");
-    assert(p.Number(out) == true);
-    assert(out == -2);
-
-    p = Parser("x");
-    assert(p.Number(out) == false);
+    for (auto&& tc : ttTrue) {
+        Parser p(tc);
+        assert(p.Float() == true);
+        assert(p.Tail() == "");
+    }
+    for (auto&& tc : ttFalse) {
+        Parser p(tc);
+        assert(p.Float() == false);
+        assert(p.Tail() == tc);
+    }
 }
 
 void TestNumber()
@@ -544,6 +557,7 @@ int main()
     TestUndo();
     TestOut();
     TestNumber_Int();
+    TestFloat();
     TestNumber();
     TestLine();
     TestSpace();

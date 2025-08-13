@@ -26,6 +26,9 @@ public:
     // Matches a number and outputs it.
     // Advances the parser if it matches.
     bool Number(int& out);
+    // Matches a float number.
+    // Advances the parser if it matches.
+    bool Float();
     // Matches a number.
     // Advances the parser if it matches.
     bool Number();
@@ -170,6 +173,30 @@ bool Parser::Number(int& out)
         out = atoi(m.data());
         return true;
     }
+    return false;
+}
+
+bool Parser::Float()
+{
+    auto m = Mark();
+    Match('-', '+');
+    auto n = Mark();
+    if (Match('.') && !While({ '0', '9' })) {
+        Back(m);
+        return false;
+    }
+    if (While({ '0', '9' }) && Match('.') && While({ '0', '9' })) { }
+    if (Match('e', 'E')) {
+        Match('-', '+');
+        if (!While({ '0', '9' })) {
+            Back(m);
+            return false;
+        }
+    }
+    if (Moved(n)) {
+        return true;
+    }
+    Back(m);
     return false;
 }
 
