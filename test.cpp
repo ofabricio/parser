@@ -1,7 +1,16 @@
 #include <assert.h>
 #include <functional>
+#include <iostream>
 
 #include "walker.hpp"
+
+#define assert_msg(cond, msg)                                 \
+    {                                                         \
+        bool v = cond;                                        \
+        if (!v)                                               \
+            std::cout << "failed case: " << msg << std::endl; \
+        assert(v);                                            \
+    }
 
 void Example_Expr()
 {
@@ -207,6 +216,39 @@ void TestOut()
     p.Match('a');
     assert(p.Out(p.Mark(), p.Number(), out4) == true);
     assert(out4 == (std::vector<std::string_view> { "111", "222" }));
+}
+
+void TestNumber_Float()
+{
+    auto ttTrue = std::vector<std::pair<std::string_view, float>> {
+        { "0", 0 }, { "2", 2 }, { "190", 190 }, { "-2", -2 }, { "+2", 2 },
+        { "02", 2 }, { "-02", -2 }, { "+02", 2 }, // Should this be allowed?
+        { "0", 0 }, { "1", 1 }, { "-1", -1 }, { "-20", -20 }, { "-0", 0 }, { "190", 190 },
+        { "0.0", 0.0 }, { "1.5", 1.5 }, { "-1.0", -1.0 }, { "+1.0", 1.0 }, { "1.234", 1.234 },
+        { "123.456", 123.456 },
+        { ".35", .35 }, { "-.35", -.35 }, { "+.35", .35 }, // Should this be allowed?
+        { "4e2", 4e2 }, { "4.e2", 4.e2 }, { "4.3e2", 4.3e2 }, { "4.3E2", 4.3E2 },
+        { "4.3e+2", 4.3e+2 }, { "4.3e-2", 4.3e-2 }, //
+    };
+
+    auto ttFalse = {
+        "-", "+", "4.3e", "4.3e-", ".e", "..2", "1.e"
+    };
+
+    for (auto&& tc : ttTrue) {
+        float out;
+        Parser p(tc.first);
+        assert_msg(p.Number(out) == true, tc.first);
+        assert_msg(out == tc.second, tc.first);
+        assert_msg(p.Tail() == "", tc.first);
+    }
+    for (auto&& tc : ttFalse) {
+        float out = -1;
+        Parser p(tc);
+        assert_msg(p.Number(out) == false, tc);
+        assert_msg(out == -1, tc);
+        assert_msg(p.Tail() == tc, tc);
+    }
 }
 
 void TestNumber_Int()
@@ -556,6 +598,7 @@ int main()
     TestPeek();
     TestUndo();
     TestOut();
+    TestNumber_Float();
     TestNumber_Int();
     TestFloat();
     TestNumber();

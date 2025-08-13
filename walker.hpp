@@ -23,6 +23,9 @@ public:
     bool Out(std::string_view m, bool cond, std::string& out);
     bool Out(std::string_view m, bool cond, std::vector<std::string_view>& out);
     bool Out(std::string_view m, bool cond, std::vector<std::string>& out);
+    // Matches a float number and outputs it.
+    // Advances the parser if it matches.
+    bool Number(float& out);
     // Matches a number and outputs it.
     // Advances the parser if it matches.
     bool Number(int& out);
@@ -164,6 +167,16 @@ bool Parser::Undo(std::string_view m, bool cond)
         Back(m);
     }
     return cond;
+}
+
+bool Parser::Number(float& out)
+{
+    auto m = Mark();
+    if (Float()) {
+        out = atof(m.data());
+        return true;
+    }
+    return false;
 }
 
 bool Parser::Number(int& out)
